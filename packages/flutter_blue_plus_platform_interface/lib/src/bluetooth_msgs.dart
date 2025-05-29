@@ -308,7 +308,6 @@ class BmBluetoothCharacteristic {
   List<BmBluetoothDescriptor> descriptors;
   BmCharacteristicProperties properties;
 
-
   BmBluetoothCharacteristic({
     required this.remoteId,
     required this.serviceUuid,
@@ -473,7 +472,6 @@ class BmCharacteristicData {
   final int errorCode;
   final String errorString;
 
-
   BmCharacteristicData({
     required this.remoteId,
     required this.serviceUuid,
@@ -539,7 +537,6 @@ class BmWriteCharacteristicRequest {
   final BmWriteType writeType;
   final bool allowLongWrite;
   final List<int> value;
-
 
   BmWriteCharacteristicRequest({
     required this.remoteId,
@@ -640,7 +637,6 @@ class BmSetNotifyValueRequest {
   final Guid? primaryServiceUuid;
   final bool forceIndications;
   final bool enable;
-
 
   BmSetNotifyValueRequest({
     required this.remoteId,
@@ -887,7 +883,7 @@ class BmCreateBondRequest {
     required this.remoteId,
     required this.pin,
   });
-  
+
   Map<dynamic, dynamic> toMap() {
     final Map<dynamic, dynamic> data = {};
     data['remote_id'] = remoteId.str;
@@ -996,3 +992,19 @@ class PhySupport {
 // random number defined by flutter blue plus.
 // Ideally it should not conflict with iOS or Android error codes.
 int bmUserCanceledErrorCode = 23789258;
+
+class BmRetrievePeripheralsRequest {
+  final List<String> identifiers;
+
+  BmRetrievePeripheralsRequest({
+    required this.identifiers,
+  });
+
+  Map<dynamic, dynamic> toMap() {
+    final Map<dynamic, dynamic> data = {};
+
+    data['identifiers'] = identifiers;
+
+    return data;
+  }
+}

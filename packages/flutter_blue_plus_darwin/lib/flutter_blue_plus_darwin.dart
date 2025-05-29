@@ -26,6 +26,14 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
   final _onScanResponseController = StreamController<BmScanResponse>.broadcast();
   final _onServicesResetController = StreamController<BmBluetoothDevice>.broadcast();
 
+  ///
+  final _onwillRestoreStateController = StreamController<BmDevicesList>.broadcast();
+
+  @override
+  Stream<BmDevicesList> get onWillRestoreState {
+    return _onwillRestoreStateController.stream;
+  }
+
   @override
   Stream<BmBluetoothAdapterState> get onAdapterStateChanged {
     return _onAdapterStateChangedController.stream;
@@ -95,9 +103,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmConnectRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'connect',
-      request.toMap(),
-    ) == true;
+          'connect',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -105,9 +114,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmDisconnectRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'disconnect',
-      request.remoteId.str,
-    ) == true;
+          'disconnect',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -115,9 +125,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmDiscoverServicesRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'discoverServices',
-      request.remoteId.str,
-    ) == true;
+          'discoverServices',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -159,8 +170,9 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmIsSupportedRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'isSupported',
-    ) == true;
+          'isSupported',
+        ) ==
+        true;
   }
 
   @override
@@ -168,9 +180,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadCharacteristicRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'readCharacteristic',
-      request.toMap(),
-    ) == true;
+          'readCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -178,9 +191,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadDescriptorRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'readDescriptor',
-      request.toMap(),
-    ) == true;
+          'readDescriptor',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -188,9 +202,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmReadRssiRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'readRssi',
-      request.remoteId.str,
-    ) == true;
+          'readRssi',
+          request.remoteId.str,
+        ) ==
+        true;
   }
 
   @override
@@ -201,9 +216,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     _logColor = request.logColor;
 
     return await _invokeMethod<bool>(
-      'setLogLevel',
-      request.logLevel.index,
-    ) == true;
+          'setLogLevel',
+          request.logLevel.index,
+        ) ==
+        true;
   }
 
   @override
@@ -211,9 +227,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSetNotifyValueRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'setNotifyValue',
-      request.toMap(),
-    ) == true;
+          'setNotifyValue',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -221,9 +238,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmSetOptionsRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'setOptions',
-      request.toMap(),
-    ) == true;
+          'setOptions',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -231,9 +249,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmScanSettings request,
   ) async {
     return await _invokeMethod<bool>(
-      'startScan',
-      request.toMap(),
-    ) == true;
+          'startScan',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -241,8 +260,9 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmStopScanRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'stopScan',
-    ) == true;
+          'stopScan',
+        ) ==
+        true;
   }
 
   @override
@@ -250,9 +270,10 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmWriteCharacteristicRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'writeCharacteristic',
-      request.toMap(),
-    ) == true;
+          'writeCharacteristic',
+          request.toMap(),
+        ) ==
+        true;
   }
 
   @override
@@ -260,9 +281,22 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     BmWriteDescriptorRequest request,
   ) async {
     return await _invokeMethod<bool>(
-      'writeDescriptor',
-      request.toMap(),
-    ) == true;
+          'writeDescriptor',
+          request.toMap(),
+        ) ==
+        true;
+  }
+
+  @override
+  Future<BmDevicesList> retrievePeripherals(
+    BmRetrievePeripheralsRequest request,
+  ) async {
+    return BmDevicesList.fromMap(
+      await _invokeMethod(
+        'retrievePeripherals',
+        request.toMap(),
+      ),
+    );
   }
 
   Future<T?> _invokeMethod<T>(
@@ -332,6 +366,13 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
 
     // handle method call
     switch (call.method) {
+      case 'OnWillRestoreState':
+        return _onwillRestoreStateController.add(
+          BmDevicesList.fromMap(
+            call.arguments,
+          ),
+        );
+
       case 'OnAdapterStateChanged':
         return _onAdapterStateChangedController.add(
           BmBluetoothAdapterState.fromMap(

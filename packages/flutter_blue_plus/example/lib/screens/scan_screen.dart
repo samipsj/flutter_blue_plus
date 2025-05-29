@@ -61,18 +61,12 @@ class _ScanScreenState extends State<ScanScreen> {
     }
     try {
       await FlutterBluePlus.startScan(
-        timeout: const Duration(seconds: 15),
+        timeout: null,
         withServices: [
           // Guid("180f"), // battery
           // Guid("180a"), // device info
           // Guid("1800"), // generic access
           // Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
-        ],
-        webOptionalServices: [
-          Guid("180f"), // battery
-          Guid("180a"), // device info
-          Guid("1800"), // generic access
-          Guid("6e400001-b5a3-f393-e0a9-e50e24dcca9e"), // Nordic UART
         ],
       );
     } catch (e, backtrace) {
@@ -106,7 +100,7 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future onRefresh() {
     if (_isScanning == false) {
-      FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+      FlutterBluePlus.startScan(timeout: null);
     }
     if (mounted) {
       setState(() {});

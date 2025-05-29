@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'utils.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -33,7 +35,10 @@ extension Extra on BluetoothDevice {
   Future<void> connectAndUpdateStream() async {
     _cstream.add(true);
     try {
-      await connect(mtu: null);
+      final sharedPref = await SharedPreferences.getInstance();
+      await sharedPref.setString('lastConnected', remoteId.str);
+
+      await connect(mtu: null, timeout: null);
     } finally {
       _cstream.add(false);
     }

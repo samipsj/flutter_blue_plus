@@ -57,14 +57,17 @@ class FlutterBluePlus {
   static LogLevel get logLevel => _logLevel;
 
   /// Checks whether the hardware supports Bluetooth
-  static Future<bool> get isSupported async => await _invokeMethod(() => FlutterBluePlusPlatform.instance.isSupported(BmIsSupportedRequest()));
+  static Future<bool> get isSupported async =>
+      await _invokeMethod(() => FlutterBluePlusPlatform.instance.isSupported(BmIsSupportedRequest()));
 
   /// The current adapter state
   static BluetoothAdapterState get adapterStateNow =>
       _adapterStateNow != null ? _bmToAdapterState(_adapterStateNow!) : BluetoothAdapterState.unknown;
 
   /// Return the friendly Bluetooth name of the local Bluetooth adapter
-  static Future<String> get adapterName async => await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest())).then((r) => r.adapterName);
+  static Future<String> get adapterName async =>
+      await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterName(BmBluetoothAdapterNameRequest()))
+          .then((r) => r.adapterName);
 
   /// returns whether we are scanning as a stream
   static Stream<bool> get isScanning => _isScanning.stream;
@@ -110,7 +113,8 @@ class FlutterBluePlus {
     bool showPowerAlert = true,
     bool restoreState = false,
   }) async {
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));
+    await _invokeMethod(() => FlutterBluePlusPlatform.instance
+        .setOptions(BmSetOptionsRequest(showPowerAlert: showPowerAlert, restoreState: restoreState)));
   }
 
   /// Turn on Bluetooth (Android only),
@@ -126,8 +130,7 @@ class FlutterBluePlus {
     // only wait if bluetooth was off
     if (changed) {
       // wait for response
-      BmTurnOnResponse response = await futureResponse
-          .fbpTimeout(timeout, "turnOn");
+      BmTurnOnResponse response = await futureResponse.fbpTimeout(timeout, "turnOn");
 
       // check response
       if (response.userAccepted == false) {
@@ -143,7 +146,8 @@ class FlutterBluePlus {
   static Stream<BluetoothAdapterState> get adapterState async* {
     // get current state if needed
     if (_adapterStateNow == null) {
-      var result = await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
+      var result =
+          await _invokeMethod(() => FlutterBluePlusPlatform.instance.getAdapterState(BmBluetoothAdapterStateRequest()));
       // update _adapterStateNow if it is still null after the await
       _adapterStateNow ??= result.adapterState;
     }
@@ -165,7 +169,8 @@ class FlutterBluePlus {
   /// - You must still call device.connect() to connect them to *your app*
   /// - [withServices] required on iOS (for privacy purposes). ignored on android.
   static Future<List<BluetoothDevice>> systemDevices(List<Guid> withServices) async {
-    var r = await _invokeMethod(() => FlutterBluePlusPlatform.instance.getSystemDevices(BmSystemDevicesRequest(withServices: withServices)));
+    var r = await _invokeMethod(
+        () => FlutterBluePlusPlatform.instance.getSystemDevices(BmSystemDevicesRequest(withServices: withServices)));
     for (BmBluetoothDevice device in r.devices) {
       if (device.platformName != null) {
         _platformNames[device.remoteId] = device.platformName!;
@@ -394,7 +399,8 @@ class FlutterBluePlus {
   /// Sets the internal FlutterBlue log level
   static Future<void> setLogLevel(LogLevel level, {color = true}) async {
     _logLevel = level;
-    await _invokeMethod(() => FlutterBluePlusPlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
+    await _invokeMethod(
+        () => FlutterBluePlusPlatform.instance.setLogLevel(BmSetLogLevelRequest(logLevel: level, logColor: color)));
   }
 
   /// Request Bluetooth PHY support
@@ -406,6 +412,21 @@ class FlutterBluePlus {
     }
 
     return await _invokeMethod(() => FlutterBluePlusPlatform.instance.getPhySupport(PhySupportRequest()));
+  }
+
+  /// Retrieve a list of devices currently connected from identifiers
+  /// -
+  /// - You must still call device.connect() to connect them to *your app*
+  /// - only for iOS
+  static Future<List<BluetoothDevice>> retrievePeripherals(List<String> identifiers) async {
+    var r = await _invokeMethod(() =>
+        FlutterBluePlusPlatform.instance.retrievePeripherals(BmRetrievePeripheralsRequest(identifiers: identifiers)));
+    for (BmBluetoothDevice device in r.devices) {
+      if (device.platformName != null) {
+        _platformNames[device.remoteId] = device.platformName!;
+      }
+    }
+    return r.devices.map((d) => BluetoothDevice.fromId(d.remoteId.str)).toList();
   }
 
   static Future<void> _initFlutterBluePlus() async {
@@ -535,7 +556,10 @@ class FlutterBluePlus {
 
     // keep track of characteristic values
     try {
-      _mergeStreams([FlutterBluePlusPlatform.instance.onCharacteristicReceived, FlutterBluePlusPlatform.instance.onCharacteristicWritten]).listen((r) {
+      _mergeStreams([
+        FlutterBluePlusPlatform.instance.onCharacteristicReceived,
+        FlutterBluePlusPlatform.instance.onCharacteristicWritten
+      ]).listen((r) {
         if (r.success == true) {
           _lastChrs[r.remoteId] ??= {};
           _lastChrs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}"] = r.value;
@@ -547,7 +571,9 @@ class FlutterBluePlus {
 
     // keep track of descriptor values
     try {
-      _mergeStreams([FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten]).listen((r) {
+      _mergeStreams(
+              [FlutterBluePlusPlatform.instance.onDescriptorRead, FlutterBluePlusPlatform.instance.onDescriptorWritten])
+          .listen((r) {
         if (r.success == true) {
           _lastDescs[r.remoteId] ??= {};
           _lastDescs[r.remoteId]!["${r.serviceUuid}:${r.characteristicUuid}:${r.descriptorUuid}"] = r.value;
@@ -596,8 +622,8 @@ class FlutterBluePlus {
   /// Turn off Bluetooth (Android only),
   @Deprecated('Deprecated in Android SDK 33 with no replacement')
   static Future<void> turnOff({int timeout = 10}) async {
-    var responseStream = FlutterBluePlusPlatform.instance.onAdapterStateChanged
-        .where((p) => p.adapterState == BmAdapterStateEnum.off);
+    var responseStream =
+        FlutterBluePlusPlatform.instance.onAdapterStateChanged.where((p) => p.adapterState == BmAdapterStateEnum.off);
 
     // Start listening now, before invokeMethod, to ensure we don't miss the response
     Future<BmBluetoothAdapterState> futureResponse = responseStream.first;
@@ -607,8 +633,7 @@ class FlutterBluePlus {
 
     // only wait if bluetooth was on
     if (changed) {
-      await futureResponse
-          .fbpTimeout(timeout, "turnOff");
+      await futureResponse.fbpTimeout(timeout, "turnOff");
     }
   }
 

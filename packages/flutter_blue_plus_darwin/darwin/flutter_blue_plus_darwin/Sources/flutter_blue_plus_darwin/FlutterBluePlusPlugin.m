@@ -68,7 +68,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
-    instance.restoreState = @(NO);
+    instance.restoreState = @(YES);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -787,6 +787,38 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                                     message:@"android only"
                                     details:NULL]);
         }
+        else if([@"retrievePeripherals" isEqualToString:call.method]) {
+            NSArray<NSString *> *uuidStrings = call.arguments[@"identifiers"];
+            NSLog(@"retrievePeripherals UUID Strings: %@", uuidStrings);
+
+            NSMutableArray<NSUUID *> *uuidObjects = [NSMutableArray new];
+
+            for (NSString *uuidString in uuidStrings) {
+                if ([uuidString isKindOfClass:[NSString class]]) {
+                    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
+                    if (uuid != nil) {
+                        [uuidObjects addObject:uuid];
+                    } else {
+                        NSLog(@"Invalid UUID string: %@", uuidString);
+                    }
+                }
+            }
+
+            // retrieve peripherals by UUID
+            NSArray<CBPeripheral *> *peripherals = [self.centralManager retrievePeripheralsWithIdentifiers:uuidObjects];
+
+            // convert to response format
+            NSMutableArray *deviceProtos = [NSMutableArray new];
+            for (CBPeripheral *p in peripherals) {
+                [deviceProtos addObject:[self bmBluetoothDevice:p]];
+            }
+
+            NSDictionary* response = @{
+                @"devices": deviceProtos,
+            };
+
+            result(response);
+        }
         else
         {
             result(FlutterMethodNotImplemented);
@@ -1045,13 +1077,21 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
     Log(LDEBUG, @"centralManagerWillRestoreState");
 
-    // restore adapter state
-    [self centralManagerDidUpdateState:central];
-
     NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
-    
+
+    NSMutableArray *restoredDevices = [NSMutableArray new];
+      NSDictionary *result = @{
+        @"devices": restoredDevices,
+    };
     for (CBPeripheral *peripheral in peripherals) {
-        
+        [restoredDevices addObject:[self bmBluetoothDevice:peripheral]]; 
+    }
+    [self.methodChannel invokeMethod:@"OnWillRestoreState" arguments:result];
+    
+    // restore adapter state
+    // [self centralManagerDidUpdateState:central];
+
+    for (CBPeripheral *peripheral in peripherals) {
         // Set the delegate to self to receive the peripheral callbacks
         peripheral.delegate = self;
 
@@ -1081,6 +1121,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
                 }
             }
         }
+    }
+
+
+   NSArray *restoredServices = state[CBCentralManagerRestoredStateScanServicesKey];
+    if ([restoredServices isKindOfClass:[NSArray class]]) {
+        NSLog(@"Restored scan for services: %@", restoredServices);
+        [self.centralManager scanForPeripheralsWithServices:restoredServices options:nil];
     }
 }
 

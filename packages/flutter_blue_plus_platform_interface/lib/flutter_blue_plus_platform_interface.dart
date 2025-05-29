@@ -283,4 +283,19 @@ abstract base class FlutterBluePlusPlatform {
   ) {
     return Future.value(false);
   }
+
+  ///
+  Stream<BmDevicesList> get onWillRestoreState {
+    return Stream.empty();
+  }
+
+  Future<BmDevicesList> retrievePeripherals(
+    BmRetrievePeripheralsRequest request,
+  ) {
+    return Future.value(
+      BmDevicesList(
+        devices: const [],
+      ),
+    );
+  }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/service_tile.dart';
 import '../widgets/characteristic_tile.dart';
@@ -84,6 +85,24 @@ class _DeviceScreenState extends State<DeviceScreen> {
     return _connectionState == BluetoothConnectionState.connected;
   }
 
+  // This function simulates a memory warning by allocating a large amount of memory.
+  // Use with caution: this is for testing purposes only.
+  void createMemoryWarning() {
+    List<List<int>> allocations = [];
+    try {
+      int i = 0;
+      while (true) {
+        // Allocate 10MB chunks
+        allocations.add(List.filled(10 * 1024 * 1024, 0));
+        print("Trying to simulate memory warning: $i");
+        i++;
+      }
+    } catch (e) {
+      print("Memory warning simulated: $e");
+      rethrow; // Optionally rethrow to actually crash the app
+    }
+  }
+
   Future onConnectPressed() async {
     try {
       await widget.device.connectAndUpdateStream();
@@ -101,6 +120,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Future onCancelPressed() async {
     try {
+      final sharedPref = await SharedPreferences.getInstance();
+      await sharedPref.remove('lastConnected');
+
       await widget.device.disconnectAndUpdateStream(queue: false);
       Snackbar.show(ABC.c, "Cancel: Success", success: true);
     } catch (e, backtrace) {
@@ -112,6 +134,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   Future onDisconnectPressed() async {
     try {
+      final sharedPref = await SharedPreferences.getInstance();
+      await sharedPref.remove('lastConnected');
+
       await widget.device.disconnectAndUpdateStream();
       Snackbar.show(ABC.c, "Disconnect: Success", success: true);
     } catch (e, backtrace) {
@@ -260,6 +285,11 @@ class _DeviceScreenState extends State<DeviceScreen> {
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
+              ElevatedButton(
+                  onPressed: () {
+                    createMemoryWarning();
+                  },
+                  child: Text('Simulate Memory warning')),
               buildRemoteId(context),
               ListTile(
                 leading: buildRssiTile(context),
