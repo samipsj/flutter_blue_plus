@@ -283,4 +283,9 @@ abstract base class FlutterBluePlusPlatform {
   ) {
     return Future.value(false);
   }
+
+  ///
+  Stream<BmDevicesList> get onWillRestoreState {
+    return Stream.empty();
+  }
 }
