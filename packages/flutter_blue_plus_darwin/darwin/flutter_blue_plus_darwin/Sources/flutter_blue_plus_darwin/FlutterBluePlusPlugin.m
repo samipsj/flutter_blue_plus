@@ -68,7 +68,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     instance.scanCounts = [NSMutableDictionary new];
     instance.logLevel = LDEBUG;
     instance.showPowerAlert = @(YES);
-    instance.restoreState = @(NO);
+    instance.restoreState = @(YES);
 
     [registrar addMethodCallDelegate:instance channel:methodChannel];
 }
@@ -1049,6 +1049,20 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     [self centralManagerDidUpdateState:central];
 
     NSArray *peripherals = state[CBCentralManagerRestoredStatePeripheralsKey];
+
+
+    NSMutableArray *restoredDevices = [NSMutableArray new];
+    for (CBPeripheral *peripheral in peripherals) {
+        [restoredDevices addObject:[self bmBluetoothDevice:peripheral]];
+    }
+
+    NSDictionary *result = @{
+        @"devices": restoredDevices,
+    };
+
+    [self.methodChannel invokeMethod:@"OnWillRestoreState" arguments:result];
+
+  
     
     for (CBPeripheral *peripheral in peripherals) {
         
