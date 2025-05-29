@@ -256,5 +256,5 @@ class OnWillRestoreStateEvent {
   OnWillRestoreStateEvent(this._response);
 
   /// the relevant devices
-  List<BluetoothDevice> get device => _response.devices.map((e) => BluetoothDevice(remoteId: e.remoteId)).toList();
+  List<BluetoothDevice> get devices => _response.devices.map((e) => BluetoothDevice(remoteId: e.remoteId)).toList();
 }
