@@ -1052,20 +1052,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 
 
     NSMutableArray *restoredDevices = [NSMutableArray new];
+
     for (CBPeripheral *peripheral in peripherals) {
-        [restoredDevices addObject:[self bmBluetoothDevice:peripheral]];
-    }
+            [restoredDevices addObject:[self bmBluetoothDevice:peripheral]];
 
-    NSDictionary *result = @{
-        @"devices": restoredDevices,
-    };
-
-    [self.methodChannel invokeMethod:@"OnWillRestoreState" arguments:result];
-
-  
-    
-    for (CBPeripheral *peripheral in peripherals) {
-        
         // Set the delegate to self to receive the peripheral callbacks
         peripheral.delegate = self;
 
@@ -1096,6 +1086,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
             }
         }
     }
+
+
+    NSDictionary *result = @{
+        @"devices": restoredDevices,
+    };
+
+    [self.methodChannel invokeMethod:@"OnWillRestoreState" arguments:result];
 }
 
 
